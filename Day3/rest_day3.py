@@ -27,7 +27,7 @@ def main():
             print(f"Fail to get IMG {res.status_code}: {res.reason}")
         # '''
         # Debug POST
-        r = requests.post('http://httpbin.org/post', json={"key": "value"}, 
+        r = requests.fetch('http://httpbin.org/fetch', json={"key": "value"}, 
                           headers={"Custom-Head":"AntaniX2"})
         if( r.status_code==requests.codes.ok):
             print(r.json())
