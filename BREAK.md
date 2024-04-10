@@ -1,7 +1,7 @@
 BREAK
 ======
 
-Until 14:00
+Until XX:XX
 
 * _Drink_ water
 * _Move_ you body
