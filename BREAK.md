@@ -1,8 +1,8 @@
 BREAK
 ======
 
-Until XX:XX
+Until 17:30
 
-* _Drink_ water
-* _Move_ you body
-* _Take care_ of you
+* __Drink__ water
+* __Move__ you body
+* __Take care__ of you
