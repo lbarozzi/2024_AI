@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>Hello form</title>
+    </head>
+    <body>
+        {%if test %}
+        <h1>{{test}}</h1>
+        {%endif%}
+        <form method="POST" action="/form_test">
+            <input type="text" name="firstname"/>
+            <br>
+            <input type="text" name="lastname"/>
+            <br>
+            <input type="date" name="DOB"/>
+            <br>
+            <input type="submit" name="Add"/>
+        </form>
+    </body>
+</html>
