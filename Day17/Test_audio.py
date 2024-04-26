@@ -88,19 +88,20 @@ class AzSpeech:
     rate, audio = read(self.fname)
     sd.play(audio, samplerate=rate)
     sd.wait()
+    return rate, audio
 
-  def Listen(self):
+  def Listen(self,duration=None, fname=None):
+    duration= duration or self.duration
     # Record response
+    fname=fname or self.fname
     # self.fname=f"{today}presentazione.wav"
-    recording = sd.rec(int(self.duration * self.freq), samplerate=self.freq, channels=1)
+    recording = sd.rec(int(duration * self.freq), samplerate=self.freq, channels=1)
     sd.wait()
 
     # Write to file
-    write(self.fname, self.freq, recording)                   #PCM
-    wv.write(self.fname, recording, self.freq, sampwidth=1)   #Headers Wave (RIFF)
+    write(self.fname, self.freq, recording)                   #PCM WAV standard 
+    # wv.write(self.fname, recording, self.freq, sampwidth=1)   #Headers Wave (RIFF) NOT TRUE: USELESS! 
 
-    # '''
-    # STT
     headers = {
         'Ocp-Apim-Subscription-Key':self.SPEECHKEY,
         'Content-type':f'codecs=audio/pcm; samplerate={self.freq}',
@@ -114,62 +115,68 @@ class AzSpeech:
     buf= open(self.fname,"rb")
 
     res= requests.post(STT,data=buf,headers=headers,params=params)
+    
     print(f"Res: {res.status_code}: {res.reason}")
+    buf.close()
     res.raise_for_status()
 
     # print(res.json())
-
     testo = res.json()["DisplayText"]
 
     # print(f"pres: {prestest}")
-    return testo
-# '''
+    return testo #, recording
 
-AzTest= AzSpeech()
 
-AzTest.Say("Buongiorno! Per favore Presentati")
 
-prestest= AzTest.Listen()
+def main():
+    AzTest= AzSpeech(SPEECHKEY,LOC,freq,duration)
 
-# '''
-# Process with cg service 
-headers = {
-    'Ocp-Apim-Subscription-Key':LANGKEY,
-    'Accept':'text/json',
-}
+    AzTest.Say("Buongiorno! Per favore Presentati")
 
-data = {
-  "kind": "EntityRecognition",
-  "parameters": {
-    "modelVersion": "latest"
-  },
-  "analysisInput": {
-    "documents": [
-      {
-        "id": "1",
-        "language": "en",
-        "text": prestest
+    prestest= AzTest.Listen(duration=1)
+
+    # '''
+    # Process with cg service 
+    headers = {
+        'Ocp-Apim-Subscription-Key':LANGKEY,
+        'Accept':'text/json',
+    }
+
+    data = {
+      "kind": "EntityRecognition",
+      "parameters": {
+        "modelVersion": "latest"
+      },
+      "analysisInput": {
+        "documents": [
+          {
+            "id": "1",
+            "language": "en",
+            "text": prestest
+          }
+        ]
       }
-    ]
-  }
-}
+    }
 
-res= requests.post(ENT,headers=headers, 
-                   data=json.dumps(data),
-                   params={'api-version':'2023-04-01'})
-res.raise_for_status()
-print(res.json())
-nome=""
-ents=res.json()["results"]["documents"][0]["entities"]
-for e in ents:
-    print(f"e: {e}")
-    if e["category"]=='Person':
-        nome=e["text"]
-        break
+    res= requests.post(ENT,headers=headers, 
+                      data=json.dumps(data),
+                      params={'api-version':'2023-04-01'})
+    res.raise_for_status()
+    print(res.json())
+    nome=""
+    ents=res.json()["results"]["documents"][0]["entities"]
+    for e in ents:
+        print(f"e: {e}")
+        if e["category"]=='Person':
+            nome=e["text"]
+            break
 
-print(f"Ciao {nome}")
+    print(f"Ciao {nome}")
 
-AzTest.Say(f"Ciao {nome}!")
+    AzTest.Say(f"Ciao {nome}!")
 
-#Done
-print("Bye bye")
+    #Done
+    print("Bye bye")
+
+if __name__=="__main__":
+   main()
