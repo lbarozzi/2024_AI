@@ -4,6 +4,7 @@ from markupsafe import  escape
 from flask import render_template
 from flask import request
 from flask import jsonify
+from flask import abort
 
 app = Flask(__name__)
 
@@ -34,7 +35,8 @@ def delete_user(id):
 # '''
 @app.route("/form_test", methods=["GET"])
 def render_form():
-    return render_template('Myform.html')
+    # abort(415)
+    return render_template('Myform.html'),204
 # '''
 
 @app.route("/form_test", methods=["POST"])
@@ -47,3 +49,12 @@ def test_form():
     mysurname= request.form["lastname"]
     # request.files['']
     return jsonify({'name':myname,'surname':mysurname})
+
+
+def main():
+    app.run(host='0.0.0.0')
+    pass
+
+
+if __name__=="__main__":
+    main()
