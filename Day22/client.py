@@ -4,7 +4,10 @@ import requests
 import cv2 
 from pprint import pprint
 import numpy as np
+from  dotenv import load_dotenv
+import time
 
+load_dotenv()
 '''
 curl https://cristina-lab15.cognitiveservices.azure.com/customvision/v3.0/Prediction/fcdb9df4-2fdc-4a70-b74c-915516cb6184/detect/iterations/PlateDetector/url 
 -H "Prediction-Key:aa4e4e39769d4cc9a5239885d79451a9" 
@@ -13,7 +16,7 @@ curl https://cristina-lab15.cognitiveservices.azure.com/customvision/v3.0/Predic
 '''
 
 headers= {
-    "Prediction-Key":"aa4e4e39769d4cc9a5239885d79451a9",
+    "Prediction-Key": os.environ["PREDICTKEY"],
     "Content-type":"application/json"
 }
 
@@ -29,7 +32,7 @@ tg_url="http://www.worldlicenseplates.com/jpglps/EU_ITAL_GI2.jpg"
 # tg_url="https://cdn.motor1.com/images/mgl/jvgok/s1/targhe-italiane.jpg"
 # tg_url="http://www.baab.cn/wp-content/uploads/2015/01/ko_2015-01-05_12-49-44-300x174.jpg"
 # tg_url="https://www.quantomicosta.net/adminpanel/uploads/images/quanto-costa-la-visura-di-una-targa-auto.jpg"
-tg_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSImmOzx_xvgCswCvj9kA_SxeqDHdM40pzWnpwefhBIUv4rWDqUA85Al2UKE875NDo4FqQ&usqp=CAU"
+# tg_url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSImmOzx_xvgCswCvj9kA_SxeqDHdM40pzWnpwefhBIUv4rWDqUA85Al2UKE875NDo4FqQ&usqp=CAU"
 # tg_url="https://www.dueruote.it/content/dam/dueruote/it/guide/burocrazia/2019/01/18/moto-con-targa-straniera-e-divieti-di-circolazione-come-comportarsi-/gallery/rbig/_DSC1648.JPG"
 # tg_url= "https://upload.wikimedia.org/wikipedia/commons/d/d5/Green_LAMBORGHINI_AVENTADOR%2C_licence_2-TJD-38%2C_pic1.JPG"
 
@@ -49,6 +52,11 @@ img= cv2.imdecode(raw,cv2.IMREAD_COLOR)
 # cv2.imshow("Target image", img)
 
 #'''
+ocrhead={
+    "Content-Type": "application/json" ,
+    "Ocp-Apim-Subscription-Key": os.environ["LANGKEY1"]
+}
+
 i=1
 for pred in json["predictions"]:
     if pred["probability"]<0.1:
@@ -67,6 +75,37 @@ for pred in json["predictions"]:
     -H "Ocp-Apim-Subscription-Key: <subscription key>" 
     --data-ascii "{'url':'https://learn.microsoft.com/azure/ai-services/computer-vision/media/quickstarts/presentation.png'}"
     #'''
+
+        # OCR
+    url = "https://lab15azure-bl.cognitiveservices.azure.com/vision/v3.2/read/analyze"
+    headers = {
+        "Content-Type": "application/octet-stream",
+        "Ocp-Apim-Subscription-Key": "9b75739b2b0e47b985fa8aa070b0d51f"
+    }
+    # Encode the image as binary
+    ret, buffer = cv2.imencode('.jpg', plt)
+    image_encoded = buffer.tobytes()
+
+    response = requests.post(url, headers=headers, data=image_encoded)
+
+    if response.status_code == 202:
+        operation_url = response.headers.get('Operation-Location')
+        if operation_url:
+            while True:
+                time.sleep(5)
+                operation_response = requests.get(operation_url, headers=headers)
+                if operation_response.status_code != 202:
+                    break
+            try:
+                ocr_result = operation_response.json()
+                pprint(ocr_result)
+            except ValueError as e:
+                print("Error decoding JSON:", e)
+
+    elif response.status_code == 200:
+        ocr_result = response
+
+        #
     cv2.imshow(f"plate{i}",plt)
     i=i+1
 #'''
