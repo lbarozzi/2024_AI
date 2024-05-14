@@ -18,13 +18,21 @@ headers= {
 prompt= {
     "messages":[
         {"role": "system", 
-         "content": "Sei un gentile operatore turistico. Puoi dare informazioni esclusivamente sulla città di Milano"},
-         {"role": "user", "content": "quali sono i posti misteriosi della città?"},
+         "content": "Comportati come assistente turistico " +
+                 "Puoi dare informazioni esclusivamente sulla città di Milano e provincia." +
+                 "Usa, se possibile, elenchi puntati di almeno 5 elementi."+ 
+                 "Aggiungi anche dei percorsi " +
+                "Usa meno di 500 parole. " 
+                #"Usa solo versi di animali al posto delle parole come, per esempio, groar al posto di fondamenta"
+        }, 
+        {"role": "user", "content": "Raccontami una storia sulle origini di Milano"},
+        {"role": "user", "content": "che parta da un luogo noto"},
+        {"role": "user", "content": " dove di trova l'anfiteatro di Milano?"},
     ]
 }
 '''
 '{"messages":[
-    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "system", "content": "You are a helpful assistant. Use until 300 tokens"},
     {"role": "user", "content": "Does Azure OpenAI support customer managed keys?"},
     {"role": "assistant", "content": "Yes, customer managed keys are supported by Azure OpenAI."},
     {"role": "user", "content": "Do other Azure AI services support this too?"}]}'
